@@ -1,11 +1,10 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-const SerialPort = require("serialport")
 
 // The built directory structure
 //
@@ -29,10 +28,13 @@ let win: BrowserWindow | null
 
 function createWindow() {
   win = new BrowserWindow({
+    resizable: false,
+    width: 1200,
+    height: 700,
+    autoHideMenuBar: false,
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
-      nodeIntegration: true
     },
   })
 
@@ -48,12 +50,6 @@ function createWindow() {
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
 }
-
-ipcMain.on("list-all-ports", (event, args) => {
-  SerialPort.SerialPort.list().then((value: any) => {
-    event.sender.send("list-ports-result", value)
-  })
-})
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
