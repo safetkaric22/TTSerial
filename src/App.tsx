@@ -2,9 +2,16 @@ import { useState } from 'react'
 import reloadSVG from "/reload.svg"
 import COMPortSelect from './components/COMPortSelect'
 import SendFile from './components/SendFile'
+import TerminalWindow from './components/TerminalWindow'
 
 
 function App() {
+  const [terminalText, setTerminaText] = useState([])
+
+  window.ipcRenderer.on("terminal-text", (event: any, args: String) => {
+    setTerminaText([...terminalText, args])
+  })
+
   return (
     <div className='px-2.5 py-1.5'>
       <section className='flex'>
@@ -14,7 +21,7 @@ function App() {
           <img className='w-5 items-center' src={reloadSVG} />
         </button>
       </section>
-      <section className='w-full my-2 h-[320px] border border-gray-800 bg-[#151515]'></section>
+      <TerminalWindow text={terminalText} />
       <section className='mt-5'>
         <SendFile />
       </section>

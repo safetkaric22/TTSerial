@@ -1,10 +1,13 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain, ipcRenderer } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+import readline from "readline"
+import fs from "fs"
 
 // The built directory structure
 //
@@ -50,6 +53,25 @@ function createWindow() {
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
 }
+
+ipcMain.on("read-file", (event, args) => {
+  try {
+    const rl = readline.createInterface({
+      input: fs.createReadStream(args),
+      crlfDelay: Infinity,
+    });
+
+    rl.on("line", (line) => {
+      ipcMain.send("terminal-text", line)
+    });
+
+    rl.on("close", () => {
+      console.log("Citanje zavrseno.");
+    });
+  } catch (err) {
+    console.error("Greška prilikom čitanja fajla:", err);
+  }
+})
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
